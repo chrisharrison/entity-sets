@@ -1,0 +1,24 @@
+{
+  "name": "chrisharrison/entity-sets",
+  "description": "Handle non-persisted sets of domain entities.",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Chris Harrison",
+      "email": "c.harrison1988@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.1",
+    "funeralzone/valueobjects": "^0.3.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "ChrisHarrison\\EntitySets\\": "src/"
+    }
+  }
+}
