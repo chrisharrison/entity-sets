@@ -18,17 +18,27 @@ interface EntitySet extends ValueObject
      * @param $entity
      * @return static
      */
-    public function addNativeEntity(array $entity);
+    public function addNative(array $entity);
 
     /**
      * @param $entity
      * @return static
      */
-    public function updateEntity(Entity $entity);
+    public function update(Entity $entity);
 
     /**
      * @param $entity
      * @return static
      */
     public function remove(Entity $entity);
+
+    /**
+     * @return array
+     */
+    public function set(): array;
+
+    /**
+     * @return EntityId
+     */
+    public function lastId();
 }

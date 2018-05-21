@@ -5,25 +5,23 @@ declare(strict_types=1);
 namespace ChrisHarrison\EntitySets;
 
 use Assert\Assert;
-use Funeralzone\ValueObjects\Scalars\IntegerTrait;
+use Funeralzone\ValueObjects\ValueObject;
 
 trait EntityIdTrait
 {
-    use IntegerTrait;
-
     /**
      * @var int
      */
-    protected $int;
+    protected $value;
 
     /**
      * IntegerTrait constructor.
-     * @param int $int
+     * @param int|null $value
      */
-    public function __construct(int $int)
+    public function __construct(?int $value)
     {
-        Assert::that($int)->greaterOrEqualThan(0);
-        $this->int = $int;
+        Assert::that($value)->nullOr()->greaterOrEqualThan(0);
+        $this->value = $value;
     }
 
     /**
@@ -31,7 +29,7 @@ trait EntityIdTrait
      */
     public static function start()
     {
-        return new static(0);
+        return new static(null);
     }
 
     /**
@@ -39,6 +37,43 @@ trait EntityIdTrait
      */
     public function next()
     {
-        return new static($this->int + 1);
+        if ($this->value === null) {
+            return new static(0);
+        }
+        return new static($this->value + 1);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNull(): bool
+    {
+        return ($this->value === null);
+    }
+
+    /**
+     * @param ValueObject $object
+     * @return bool
+     */
+    public function isSame(ValueObject $object): bool
+    {
+        return ($this->toNative() === $object->toNative());
+    }
+
+    /**
+     * @param mixed $native
+     * @return static
+     */
+    public static function fromNative($native)
+    {
+        return new static($native);
+    }
+
+    /**
+     * @return int|null
+     */
+    public function toNative()
+    {
+        return $this->value;
     }
 }

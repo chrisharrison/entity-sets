@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace ChrisHarrison\EntitySets;
 
 use function array_filter;
-use Funeralzone\ValueObjects\CompositeTrait;
+use ChrisHarrison\EntitySets\Exceptions\InvalidInstantiationType;
+use Funeralzone\ValueObjects\ValueObject;
+use function get_class;
+use function is_object;
 
 abstract class AbstractEntitySet implements EntitySet
 {
-    use CompositeTrait;
-
     /**
      * @var array
      */
@@ -42,10 +43,24 @@ abstract class AbstractEntitySet implements EntitySet
             $lastId = call_user_func(static::entityIdType() .'::start');
         }
 
-        // TODO: Enforce types
-
         $this->set = $set;
         $this->lastId = $lastId;
+
+        static::assertTypes($this->set, static::entityType());
+    }
+
+    private static function assertTypes(array $set, string $type)
+    {
+        foreach ($set as $item) {
+            if (!is_a($item, $type)) {
+                if (is_object($item)) {
+                    $foundType = get_class($item);
+                } else {
+                    $foundType = gettype($item);
+                }
+                throw new InvalidInstantiationType($foundType, $type);
+            }
+        }
     }
 
     /**
@@ -70,7 +85,7 @@ abstract class AbstractEntitySet implements EntitySet
      * @param array $entity
      * @return static
      */
-    public function addNativeEntity(array $entity)
+    public function addNative(array $entity)
     {
         $nextId = $this->lastId->next();
         $entityObject = call_user_func(static::entityType() .'::fromNative', array_merge($entity, [
@@ -87,7 +102,7 @@ abstract class AbstractEntitySet implements EntitySet
      * @param Entity $entity
      * @return static
      */
-    public function updateEntity(Entity $entity)
+    public function update(Entity $entity)
     {
         $set = array_map(function (Entity $i) use ($entity) {
 
@@ -112,7 +127,7 @@ abstract class AbstractEntitySet implements EntitySet
             return !$i->getId()->isSame($entity->getId());
         });
 
-        return new static($set, $this->lastId);
+        return new static(array_values($set), $this->lastId);
     }
 
     /**
@@ -122,5 +137,43 @@ abstract class AbstractEntitySet implements EntitySet
     public static function fromNative($native)
     {
         return new static($native['set'], $native['lastId']);
+    }
+
+    /**
+     * @return array
+     */
+    public function set(): array
+    {
+        return $this->set;
+    }
+
+    /**
+     * @return EntityId
+     */
+    public function lastId()
+    {
+        return $this->lastId;
+    }
+
+    public function isNull(): bool
+    {
+        return false;
+    }
+
+    public function isSame(ValueObject $object): bool
+    {
+        return ($object->toNative() == $this->toNative());
+    }
+
+    public function toNative()
+    {
+        $set = array_map(function (ValueObject $value) {
+            return $value->toNative();
+        }, $this->set);
+
+        return [
+            'set' => $set,
+            'lastId' => $this->lastId->toNative(),
+        ];
     }
 }
