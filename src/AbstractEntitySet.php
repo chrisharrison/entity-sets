@@ -105,13 +105,11 @@ abstract class AbstractEntitySet implements EntitySet
     public function update(Entity $entity)
     {
         $set = array_map(function (Entity $i) use ($entity) {
-
             if (!$i->getId()->isSame($entity->getId())) {
                 return $i;
             }
 
             return $entity;
-
         }, $this->set);
 
         return new static($set, $this->lastId);
