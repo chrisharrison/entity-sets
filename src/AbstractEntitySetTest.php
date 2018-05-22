@@ -196,6 +196,23 @@ final class AbstractEntitySetTest extends TestCase
 
         $this->assertEquals($expected, $set->toNative()['set']);
     }
+
+    public function test_returns_set()
+    {
+        $set = new _AbstractEntitySet([
+            new _Entity(new _EntityId(0), new _Value('value1')),
+            new _Entity(new _EntityId(1), new _Value('value2')),
+            new _Entity(new _EntityId(2), new _Value('value3')),
+        ]);
+
+        $this->assertCount(3, $set->set());
+    }
+
+    public function test_returns_lastId()
+    {
+        $set = new _AbstractEntitySet([], new _EntityId(100));
+        $this->assertEquals(100, $set->lastId()->toNative());
+    }
 }
 
 /**
